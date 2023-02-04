@@ -5,6 +5,11 @@ def is_correct(expected, output):
     return int(torch.argmax(expected) == torch.argmax(output))
 
 
+def get_accuracy(expected, output):
+    matching = torch.argmax(expected, -2) == torch.argmax(output, -2)
+    return matching.float().mean()
+
+
 class Derivable:
     """A base class to represent a function that is derivable.
     
@@ -38,7 +43,7 @@ class Sigmoid(Derivable):
 
 class L2(Derivable):
     def __call__(self, y, a):
-        return torch.sum((y - a)**2) / 2 
+        return torch.sum((y - a)**2, -2) / 2
         
     def deriv(self, y, a):
         return y - a

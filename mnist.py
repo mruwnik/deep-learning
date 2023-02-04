@@ -67,5 +67,14 @@ def datasets(train_proportion=0.8):
     training_set = DataLoader(training_set, batch_size=30, shuffle=True)
     testing_set = DataLoader(testing_set, batch_size=30, shuffle=True)
     validation_set = DataLoader(validation_set, batch_size=30, shuffle=True)
+    print(len(training_set), len(testing_set), len(validation_set))
     
     return training_set, testing_set, validation_set
+
+
+def sample(n, batch_size=10):
+    loader = pic_loader(pic_transform=pic_to_column, label_transform=one_hot)
+    full_dataset = loader(path / "training")
+    
+    data_set, _ = torch.utils.data.random_split(full_dataset, [n, len(full_dataset) - n])
+    return DataLoader(data_set, batch_size=batch_size, shuffle=True)
