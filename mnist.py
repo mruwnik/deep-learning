@@ -20,6 +20,7 @@ pic_to_matrix = transforms.Compose([
 matrix_to_column = transforms.Compose([
     transforms.Lambda(torch.flatten),
     transforms.Lambda(lambda x: x.unsqueeze(1)),
+    transforms.Lambda(lambda x: x / 2 + 0.5),
 ])
 pic_to_column = transforms.Compose([
     pic_to_matrix,
@@ -64,11 +65,12 @@ def datasets(train_proportion=0.8):
     loader = pic_loader(pic_transform=pic_to_column, label_transform=one_hot)
     training_set, testing_set, validation_set = load_mnist(loader, train_proportion=0.8)
 
+    print(len(training_set), len(testing_set), len(validation_set))
+    
     training_set = DataLoader(training_set, batch_size=30, shuffle=True)
     testing_set = DataLoader(testing_set, batch_size=30, shuffle=True)
     validation_set = DataLoader(validation_set, batch_size=30, shuffle=True)
-    print(len(training_set), len(testing_set), len(validation_set))
-    
+        
     return training_set, testing_set, validation_set
 
 

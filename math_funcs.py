@@ -49,16 +49,46 @@ class Sigmoid(Derivable):
     def __call__(self, x):
         return self.fn(x)
     
-    def deriv(self, x):
-        return x * (1 - x)
+    def deriv(self, a):
+        return a * (1 - a)
+    
+
+class Tanh(Derivable):
+    fn = torch.nn.Tanh()
+    
+    def __call__(self, x):
+        return self.fn(x)
+    
+    def deriv(self, a):
+        return 1 - a*a
+
+    
+class ReLU(Derivable):
+    fn = torch.nn.ReLU()
+    
+    def __call__(self, x):
+        return self.fn(x)
+    
+    def deriv(self, a):
+        return a * (a > 0).float()
+
+    
+class CrossEntropy(Derivable):
+    soft = torch.nn.LogSoftmax(dim=-2)
+    
+    def __call__(self, a, y):
+        return -(y * self.soft(a)).sum()
+    
+    def deriv(self, a, y, nonlinear_deriv=None):
+        return a - y
 
 
 class L2(Derivable):
-    def __call__(self, y, a):
+    def __call__(self, a, y):
         return torch.sum((y - a)**2, -2) / 2
         
-    def deriv(self, y, a):
-        return y - a
+    def deriv(self, a, y, nonlinear_deriv=None):
+        return nonlinear_deriv(a) * (a - y)
 
     @staticmethod
     def regularization(scale, weights):

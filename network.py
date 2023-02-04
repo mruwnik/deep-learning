@@ -65,9 +65,7 @@ class Network:
         in_ = activations[-2]
         out = activations[-1]
 
-        nabla_C = self.cost_func.deriv(out, expected)
-        sigma_L = self.nonlinearity.deriv(out)
-        delta_L = nabla_C * self.nonlinearity.deriv(out)
+        delta_L = self.cost_func.deriv(out, expected, self.nonlinearity.deriv)
 
         prev_delta = delta_L
         
@@ -115,4 +113,4 @@ class Network:
             
     def cost(self, expected, output):
         """Calculate the cost between the label and what the network predicted."""
-        return self.cost_func(expected, output)
+        return self.cost_func(output, expected)
