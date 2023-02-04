@@ -31,6 +31,18 @@ class Derivable:
         pass
     
     
+class Identity(Derivable):
+    def __call__(self, x):
+        return x
+    
+    def deriv(self, x):
+        return 1
+    
+    @staticmethod
+    def regularization(scale, weights):
+        return 0
+        
+    
 class Sigmoid(Derivable):
     fn = torch.nn.Sigmoid()
     
@@ -47,3 +59,7 @@ class L2(Derivable):
         
     def deriv(self, y, a):
         return y - a
+
+    @staticmethod
+    def regularization(scale, weights):
+        return scale * weights

@@ -1,17 +1,29 @@
 import torch
 from torch import tensor
 
-from math_funcs import L2, Sigmoid
+from math_funcs import L2, Sigmoid, Identity
 
 
 class Network:
-    def __init__(self, layers, nonlinearity=Sigmoid(), cost_func=L2()):
+    def __init__(
+        self, layers,
+
+        nonlinearity=Sigmoid(),
+        cost_func=L2(),
+        
+        regularization_term=1,
+        regularizator=Identity,
+    ):
         # This assumes that each layer will use the same nonlinearity. Seems
         # like a good enough heuristic for now
         self.nonlinearity = nonlinearity
         self.cost_func = cost_func
+        # initialse the weights so that the std dev of z is 1
         self.w = [torch.rand(n_out, n_in) / torch.sqrt(tensor(n_in)) for n_in, n_out in zip(layers, layers[1:])]
         self.b = [torch.rand(n_out, 1) for n_out in layers[1:]]
+        
+        self.regularizator = regularizator
+        self.regularization_term = regularization_term
         
     def forward(self, inputs):
         """Do a forward pass and return all the activations for each layer.
@@ -59,7 +71,13 @@ class Network:
 
         prev_delta = delta_L
         
-        dw = prev_delta @ torch.transpose(in_, -2, -1) 
+        dw = prev_delta @ torch.transpose(in_, -2, -1)
+        R = self.regularizator.regularization(
+             self.regularization_term,
+             self.w[-1],
+        )
+        dw += R
+        
         db = prev_delta 
         layer_gradients.append([dw.mean(0), db.mean(0)])
         
@@ -74,6 +92,12 @@ class Network:
             prev_delta = delta_l
             
             dw = delta_l @ torch.transpose(in_, -2, -1)
+            R = self.regularizator.regularization(
+                self.regularization_term,
+                self.w[l],
+            )
+            dw += R
+            
             db = delta_l
             
             layer_gradients.append([dw.mean(0), db.mean(0)])
